@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 export function ParksIDPage() {
