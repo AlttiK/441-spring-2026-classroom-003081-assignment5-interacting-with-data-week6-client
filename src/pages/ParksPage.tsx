@@ -1,7 +1,9 @@
 import { type FormEvent, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { Park } from '../data/placeholders'
 
 export function ParksPage() {
+  const navigate = useNavigate()
   const [parks, setParks] = useState<Park[]>([])
   const [parksError, setParksError] = useState<string | null>(null)
   const [parksLoading, setParksLoading] = useState(true)
@@ -55,12 +57,12 @@ export function ParksPage() {
 
       const data: Park = await res.json()
       setSelected(data ?? null)
+      setIdInput('')
+      navigate(`/parks/${trimmed}`)
     } catch (err) {
       console.error(err)
       setSelected(null)
       setLookupError('No park found for that id.')
-    } finally {
-      setIdInput('')
     }
   }
 

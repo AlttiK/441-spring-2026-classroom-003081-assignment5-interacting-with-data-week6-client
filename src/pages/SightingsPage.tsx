@@ -1,15 +1,20 @@
 import { type SubmitEvent, useEffect, useState } from 'react'
-import { sightings } from '../data/placeholders'
 import { supabase } from '../lib/supabaseClient'
 
 export function SightingsPage() {
   const [parkId, setParkId] = useState('')
   const [speciesId, setSpeciesId] = useState('')
   const [dateTime, setDateTime] = useState('')
-  const [selectedFile, setSelectedFile] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [imagePath, setImagePath] = useState('');
   const [userId, setUserId] = useState('');
+  const [lat, setLat] = useState('');
+  const [long, setLong] = useState('');
+  const [notes, setNotes] = useState('');
   const [authErrorMessage, setAuthErrorMessage] = useState('');
+  const [sightings, setSightings] = useState<any[]>([])
+  const [sightingsError, setSightingsError] = useState<string | null>(null)
+  const [sightingsLoading, setSightingsLoading] = useState(true)
 
   useEffect(() => {
     // Check if user is logged in.
@@ -24,35 +29,66 @@ export function SightingsPage() {
     })
   }, [])
 
+  useEffect(() => {
+    async function loadSightings() {
+      try {
+        const res = await fetch('/api/sightings')
+
+        if (!res.ok) {
+          throw new Error(`Request failed: ${res.status}`)
+        }
+
+        const data = await res.json()
+        setSightings(data)
+        setSightingsError(null)
+      } catch (err) {
+        console.error(err)
+        setSightings([])
+        setSightingsError('Could not load sightings.')
+      } finally {
+        setSightingsLoading(false)
+      }
+    }
+
+    void loadSightings()
+  }, [])
+
   async function handleSubmit(e: SubmitEvent) {
     e.preventDefault()
     console.log({
       parkId,
       speciesId,
       dateTime,
+      lat,
+      long,
+      notes,
     })
     const { error } = await supabase
-      .from('sightings')
-      .insert({ ParkID: parkId, SpeciesID: speciesId, DateTime: dateTime, ImagePath: imagePath, UserID: userId})
+      .from('Sightings')
+      .insert({ ParkID: parkId, SpeciesID: speciesId, DateTime: dateTime, ImagePath: imagePath, UserID: userId, Notes: notes, Lat: lat, Long: long})
     if (error) {
       console.log("insert error", error)
     }
     setParkId('')
     setSpeciesId('')
     setDateTime('')
+    setLat('')
+    setLong('')
+    setNotes('')
   }
 
-  const onFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedFile(event.target.files?.[0] ?? null);
   };
 
   async function onFileUpload() {
+    if (!selectedFile) return;
     console.log(selectedFile);
     // Filename needs to only use "S3 safe characters" https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-keys.html
     // This appends epoch time stamp and truncates before any spaces
     let santizedFilename = `${Date.now()}-${selectedFile.name.split(' ')[0]}`
 
-    const { data, error } = await supabase.storage.from('sightingImages').upload(santizedFilename, selectedFile)
+    const { data, error } = await supabase.storage.from('SightingImages').upload(santizedFilename, selectedFile)
     if (error) {
       console.log("upload error", error)
     } else {
@@ -109,19 +145,53 @@ export function SightingsPage() {
                   />
                 </label>
               </div>
+              <div>
+                <label htmlFor="s-lat">
+                  Lat{' '}
+                  <input
+                    id="s-lat"
+                    value={lat}
+                    onChange={(e) => setLat(e.target.value)}
+                  />
+                </label>
+              </div>
+              <div>
+                <label htmlFor="s-long">
+                  Long{' '}
+                  <input
+                    id="s-long"
+                    value={long}
+                    onChange={(e) => setLong(e.target.value)}
+                  />
+                </label>
+              </div>
+              <div>
+                <label htmlFor="s-notes">
+                  Notes{' '}
+                  <input
+                    id="s-notes"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                  />
+                </label>
+              </div>
               <button type="submit">Submit</button>
             </form>
           </div>
         }
       </div>
       <h2>All sightings</h2>
-      <ul>
-        {sightings.map((s) => (
-          <li key={s.id}>
-            park {s.parkID}, species {s.speciesID}
-          </li>
-        ))}
-      </ul>
+      {sightingsLoading && <p>Loading sightings...</p>}
+      {sightingsError && <p>{sightingsError}</p>}
+      {!sightingsLoading && !sightingsError && (
+        <ul>
+          {sightings.map((s: any) => (
+            <li key={s.ID}>
+              park {s.ParkID}, species {s.SpeciesID}, {s.DateTime}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

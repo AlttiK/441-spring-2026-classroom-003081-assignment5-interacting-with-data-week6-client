@@ -133,10 +133,10 @@ export function AuthPage() {
             />
           </label>
         </div>
-        <button type="submit" disabled={busy || session}>
+        <button type="submit" disabled={busy || Boolean(session)}>
           Sign in
         </button>{' '}
-        <button type="button" onClick={() => void handleSignUp()} disabled={busy || session}>
+        <button type="button" onClick={() => void handleSignUp()} disabled={busy || Boolean(session)}>
           Sign up
         </button>
       </form>
