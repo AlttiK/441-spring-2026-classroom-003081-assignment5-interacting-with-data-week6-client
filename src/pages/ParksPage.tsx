@@ -2,6 +2,8 @@ import { type FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Park } from '../data/placeholders'
 
+const API_LOC = import.meta.env.VITE_API_LOC
+
 export function ParksPage() {
   const navigate = useNavigate()
   const [parks, setParks] = useState<Park[]>([])
@@ -15,7 +17,7 @@ export function ParksPage() {
   useEffect(() => {
     async function loadParks() {
       try {
-        const res = await fetch('/api/parks')
+        const res = await fetch(`${API_LOC}/parks`)
 
         if (!res.ok) {
           throw new Error(`Request failed: ${res.status}`)
@@ -49,7 +51,7 @@ export function ParksPage() {
     }
 
     try {
-      const res = await fetch(`/api/parks/${trimmed}`)
+      const res = await fetch(`${API_LOC}/parks/${trimmed}`)
 
       if (!res.ok) {
         throw new Error(`Request failed: ${res.status}`)

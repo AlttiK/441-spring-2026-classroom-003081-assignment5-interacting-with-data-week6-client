@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
+const API_LOC = import.meta.env.VITE_API_LOC
+
 export function ParksIDPage() {
   const { id } = useParams()
   const [sightings, setSightings] = useState<any[]>([])
@@ -19,7 +21,7 @@ export function ParksIDPage() {
         if (since) params.set('since', since)
         if (before) params.set('before', before)
 
-        const res = await fetch(`/api/sightings?${params.toString()}`)
+        const res = await fetch(`${API_LOC}/sightings?${params.toString()}`)
 
         if (!res.ok) {
           throw new Error(`Request failed: ${res.status}`)

@@ -1,6 +1,8 @@
 import { type SubmitEvent, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
+const API_LOC = import.meta.env.VITE_API_LOC
+
 export function SightingsPage() {
   const [parkId, setParkId] = useState('')
   const [speciesId, setSpeciesId] = useState('')
@@ -32,7 +34,7 @@ export function SightingsPage() {
   useEffect(() => {
     async function loadSightings() {
       try {
-        const res = await fetch('/api/sightings')
+        const res = await fetch(`${API_LOC}/sightings`)
 
         if (!res.ok) {
           throw new Error(`Request failed: ${res.status}`)
