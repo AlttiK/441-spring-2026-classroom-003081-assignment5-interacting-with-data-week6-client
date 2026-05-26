@@ -6,6 +6,23 @@ This is a small **React** frontend for Week 6 class demos. It has three pages—
 - **Parks** — Look up a park by id, lists all placeholder parks below.
 - **Sightings** — Form that logs to the console, lists placeholder sightings below.
 
+## Security
+
+Cross Site Scripting: On the client side there are a couple places where text could be used for XSS. A big example is in the ParkIDPage where the sighting comments and notes are displayed immediately. If there is a script attached to either the Notes or Comments, (though only the Notes can be currently added to when creating a Sighting) whenever a user loaded this page, the script can run. In this case though, we are using React, which protects against XSS with the {} curly brackets. These curly brackets convert special characters into symbol entities. But, to be more rigorous, would be using an allow list that only allows normal chracters and text that a comment and notes should only need.
+SQL Injection: On the client side, SQL injection could occur whenever we are trying to add a new sighting to the supabase database since that is handled directly here in the sightingsPage: 
+```
+const { error } = await supabase
+  .from('Sightings')
+  .insert({ ParkID: parkId, SpeciesID: speciesId, DateTime: dateTime, ImagePath: imagePath, UserID: userId, Notes: notes, Lat: lat, Long: long})
+```
+For the other pages, calls are sent to the API and not the client. 
+But, SQL injections are all protected already by using supabase. This is becuase queries aren't a single string and are broken up from supabase functions such as .from() or .eq(), or .select().
+DDos: There is no direct ddos protection in this client, there are no checks to see and set limits to requests anywhere. This is protected on the deployed side with vercel. Vercel automatically has a rate limiter that also sees weird behavior. In additional we can set up attack mode in the rules for the firewall that will send a JavaScript verification when there is a lot of bad traffic happening.
+2 More from OWASP:
+Software Supply Chain Vulnerabilties: There is a lot of code that is being supplied, like React, Supabase, and Vite. Any time these either go out of date or when someone finds vulnerabilites in these node packages, that also means this webste is vulnerable as a result too. Ways to protect against this in the current version is the package-lock.json which tells what versions are used, and if these are all safe, then the website is protected. But if any of these have vulnerabilites found, we need to update and make sure version are on the newest security updates. Also running npm audit to see where there could be vulnerabilites also allows development to stay up to date.
+Cryptographic Failures: Keys and other values that need to be hidden can be held in vercel as enviornment variables. This keeps keys in a place that can be access by the website to complete tasks but does not expose them to anyone. In this case though, all environemnt variables need to allow the client to see them so that the API and Database can be accessed by users. The supabase database also has Row Securities that prevent misuse of the database and only allow certain actions to authorized users or specific users. Some final steps mentioned couple be making sure algorithms are as up to date as possible so that they cannot be easily broken.
+
+
 ## Run locally
 
 ```bash
