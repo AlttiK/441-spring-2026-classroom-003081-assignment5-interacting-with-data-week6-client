@@ -22,6 +22,29 @@ DDos: There is no direct ddos protection in this client, there are no checks to 
 Software Supply Chain Vulnerabilties: There is a lot of code that is being supplied, like React, Supabase, and Vite. Any time these either go out of date or when someone finds vulnerabilites in these node packages, that also means this webste is vulnerable as a result too. Ways to protect against this in the current version is the package-lock.json which tells what versions are used, and if these are all safe, then the website is protected. But if any of these have vulnerabilites found, we need to update and make sure version are on the newest security updates. Also running npm audit to see where there could be vulnerabilites also allows development to stay up to date.
 Cryptographic Failures: Keys and other values that need to be hidden can be held in vercel as enviornment variables. This keeps keys in a place that can be access by the website to complete tasks but does not expose them to anyone. In this case though, all environemnt variables need to allow the client to see them so that the API and Database can be accessed by users. The supabase database also has Row Securities that prevent misuse of the database and only allow certain actions to authorized users or specific users. Some final steps mentioned couple be making sure algorithms are as up to date as possible so that they cannot be easily broken.
 
+## Development Guide
+
+Build an image
+```
+docker build -t <image-name> .
+```
+
+Run a container from the image
+```
+docker run --name <container-name> -p 4173:4173 <image-name>
+```
+
+Stop the container
+```
+docker stop <container-name>
+```
+
+Delete the container
+```
+docker rm <container-name>
+```
+
+If done through the docker desktop app, after building the image, starting can be done in the image tab and including the port. Stopping, and deleting can be done in the container tab with the stop and delete buttons
 
 ## Run locally
 
