@@ -16,6 +16,17 @@ export function ParksPage() {
 
   useEffect(() => {
     async function loadParks() {
+      const cached = localStorage.getItem('cached-parks')
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached)
+        if (Date.now() - timestamp < 86400000) {
+          setParks(data);
+          setParksError(null);
+          setParksLoading(false);
+          return
+        }
+      }
+
       try {
         const res = await fetch(`${API_LOC}/parks`)
 
@@ -26,6 +37,10 @@ export function ParksPage() {
         const data: Park[] = await res.json()
         setParks(data)
         setParksError(null)
+        localStorage.setItem(
+          'cached-parks',
+          JSON.stringify({ data, timestamp: Date.now() }),
+        )
       } catch (err) {
         console.error(err)
         setParks([])
